@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+    <h1>IPv6 Compression Program</h1>
+    <form id="ipv6Form">
+        <label for="ipv6Address">Enter IPv6 Address:</label>
+        <input type="text" id="ipv6Address" onkeydown="pressenter(event)">
+        <button type="button" onclick="IPv6Compression()">Compress</button>
+    </form>
+    
+    <div id="result"></div>
+    
+    <script type="text/javascript">
+        function pressenter(event){
+            if (event.key=="Enter"){
+                event.preventDefault();
+                IPv6Compression();
+            }
+        }
+    
+        function checkhex(char){
+            var valid=['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f','A','B','C','D','E','F',':'];
+            return valid.includes(char);
+        }
+    
+        function IPv6Compression(){
+            var input=document.getElementById("ipv6Address").value;
+    
+            if (input.length>39){
+                document.getElementById("result").textContent="IPv6 address must be a maximum of 39 characters long";
+                return;
+            }
+    
+            for (let i=0; i<input.length; i++){
+                var char=input[i];
+                if (!checkhex(char)){
+                    document.getElementById("result").textContent="IPv6 address entered is incorrect";
+                    return;
+                }
+            }
+    
+            var components=input.split(':');
+            var intermediate=[];
+            
+            for (let i=0; i<components.length; i++){
+                if (components[i]=='0000'){
+                    intermediate.push('0');
+                }
+                else if (components[i].slice(0,3)=='000'){
+                    intermediate.push(components[i][3]);
+                }
+                else if (components[i].slice(0,2)=='00'){
+                    intermediate.push(components[i].slice(2,4));
+                }
+                else if (components[i][0]=='0'){
+                    intermediate.push(components[i].slice(0,3));
+                }
+                else {
+                    intermediate.push(components[i]);
+                }
+            }
+            
+            var index=[];
+
+            for (let i=0; i<intermediate.length; i++){
+                if (intermediate[i]=='0'){
+                    index.push(i);
+                }
+            }
+            
+            function highcontizero(arr){
+                let longconti =[];
+                let currconti =[arr[0]];
+
+                for (let i=1; i<arr.length; i++){
+                    if (arr[i]===arr[i - 1]+1){
+                        currconti.push(arr[i]);
+                    } 
+                    else{
+                        if (currconti.length>longconti.length){
+                            longconti=currconti;
+                        }
+                        currconti=[arr[i]];
+                    }
+                }
+
+                if (currconti.length>longconti.length){
+                    longconti=currconti;
+                }
+
+                return longconti;
+            }
+
+            var change=highcontizero(index);
+            
+            var endresult=[];
+
+            for (let i=0; i<intermediate.length; i++){
+                if (i==change[0]){
+                    endresult.push(':');
+                }
+                else if (change.includes(i)){
+                    continue;
+                }
+                else{
+                    if (i==intermediate.length-1){
+                        endresult.push(intermediate[i]);
+                    }
+                    else{
+                        endresult.push(intermediate[i]+':');
+                    }
+                }
+            }
+
+            document.getElementById("result").textContent="Compressed version:"+endresult.join('');
+
+        }
+    </script>
+    
+</body>
+</html>
